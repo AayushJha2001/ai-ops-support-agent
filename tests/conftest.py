@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import asyncio
 import os
-import sys
 
 import pytest
 
@@ -36,10 +35,9 @@ get_settings.cache_clear()
 
 
 def pytest_asyncio_loop_factories(config, item):
-    # psycopg's async driver needs a selector loop on Windows.
-    if sys.platform == "win32":
-        return {"selector": asyncio.SelectorEventLoop}
-    return None
+    # psycopg's async driver needs a selector loop (Windows defaults to Proactor; on Linux the
+    # selector loop is already the default). The hook must return a non-empty mapping.
+    return {"selector": asyncio.SelectorEventLoop}
 
 
 def _ensure_test_database() -> bool:
