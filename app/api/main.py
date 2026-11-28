@@ -11,6 +11,7 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from app.agent.graph import build_graph
 from app.agent.service import AgentService
+from app.api.ratelimit import RateLimitMiddleware
 from app.api.routes import router
 from app.config import get_settings
 from app.db import close_pools, get_pool, open_pools
@@ -47,6 +48,7 @@ def create_app(graph_factory=None) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(RateLimitMiddleware, per_hour=get_settings().demo_rate_limit_per_hour)
     app.include_router(router)
 
     @app.get("/health", tags=["ops"])

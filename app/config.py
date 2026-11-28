@@ -68,6 +68,8 @@ class Settings(BaseSettings):
     max_input_chars: int = 4000
     # Browser origins allowed to call the API (the Next.js operator console).
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+    # Public-demo protection: max LLM-spending requests per client IP per hour (0 = unlimited).
+    demo_rate_limit_per_hour: int = 0
     allowed_sql_tables: list[str] = Field(
         default_factory=lambda: [
             "plans",
