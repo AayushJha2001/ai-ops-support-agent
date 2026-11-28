@@ -66,6 +66,8 @@ class Settings(BaseSettings):
     sql_row_limit: int = 50
     sql_timeout_ms: int = 3000
     max_input_chars: int = 4000
+    # Browser origins allowed to call the API (the Next.js operator console).
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
     allowed_sql_tables: list[str] = Field(
         default_factory=lambda: [
             "plans",
@@ -77,6 +79,10 @@ class Settings(BaseSettings):
             "refunds",
         ]
     )
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
     @property
     def gemini_backup_models(self) -> list[str]:

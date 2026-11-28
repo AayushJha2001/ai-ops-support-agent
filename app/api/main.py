@@ -6,6 +6,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from app.agent.graph import build_graph
@@ -39,6 +40,12 @@ def create_app(graph_factory=None) -> FastAPI:
         version="0.1.0",
         description="LangGraph support agent with tools, human-in-the-loop approvals, guardrails and evals.",
         lifespan=lifespan,
+    )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=get_settings().cors_origin_list,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
     app.include_router(router)
 
