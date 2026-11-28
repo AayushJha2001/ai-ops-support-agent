@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { type ReactNode, use, useState } from "react";
 import { browser } from "react-dom";
 import { isStaff, loadPersona, type Persona, PERSONAS, savePersona, SessionContext } from "@/lib/session";
+import ApiStatus from "./ApiStatus";
 
 const NAV = [
   { href: "/chat", label: "Chat", staffOnly: false, icon: "💬" },
@@ -90,6 +91,20 @@ function Login({ onPick }: { onPick: (p: Persona) => void }) {
         <p className="mt-3 max-w-2xl text-slate-400">
           A support agent that looks things up, opens tickets and issues refunds - with every risky action paused for a
           human to approve. Pick a demo persona to start.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <ApiStatus />
+          <a
+            href="https://github.com/AayushJha2001/ai-ops-support-agent"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-slate-400 underline-offset-4 hover:text-white hover:underline"
+          >
+            Source on GitHub ↗
+          </a>
+        </div>
+        <p className="mt-3 text-xs text-slate-500">
+          Demo data is fictional and resets periodically. Try David&apos;s refund request, then switch to Sam to approve it.
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">

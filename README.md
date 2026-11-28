@@ -114,6 +114,32 @@ cd web; npm install; npm run dev   # http://localhost:3000
 ```
 Postgres is exposed on host port **55432**, to avoid clashing with a local Postgres on 5432.
 
+### 4. Free hosted demo (Neon + Render + Vercel)
+
+Everything below runs on free plans, with no credit card needed:
+
+| Piece | Host | Notes |
+|---|---|---|
+| Postgres + pgvector | [Neon](https://neon.tech) free | Copy the **direct** connection string (`...?sslmode=require`) |
+| API (this Dockerfile) | [Render](https://render.com) free web service | `render.yaml` Blueprint; uses ~310 MB of the 512 MB limit and sleeps after 15 min idle |
+| Console (`web/`) | [Vercel](https://vercel.com) Hobby | Root directory `web`, env `NEXT_PUBLIC_API_URL=<Render URL>` |
+
+1. **Neon**: create a project, then copy the direct connection string.
+2. **Render**: go to New → Blueprint and pick this repo. When prompted, paste `DATABASE_URL`, `GEMINI_API_KEY`,
+   optionally `GROQ_API_KEY`, and `CORS_ORIGINS` (your Vercel URL). On each cold start the container
+   runs `init-db`, which creates the schema and roles, seeds demo data and indexes the knowledge base.
+3. **Vercel**: import the repo with root directory `web` and set `NEXT_PUBLIC_API_URL` to the
+   Render URL. Then update `CORS_ORIGINS` on Render to match the Vercel URL.
+
+Public-demo safety switches (already set in `render.yaml`):
+
+- `DEMO_RESET_ON_START=true` restores pristine demo data on every cold start.
+- `DEMO_RATE_LIMIT_PER_HOUR=30` caps LLM calls per visitor IP. It applies to chat and approval
+  decisions, keeps the free Gemini quota safe, and returns `429` with `Retry-After` when exceeded.
+
+The console's sign-in page shows a live API status badge. It reports "waking up…" while Render's
+free instance cold-starts, which takes about 30–60 s.
+
 ## Demo users (development only)
 
 | User | Role | API key | Notes |
@@ -191,6 +217,9 @@ All settings come from environment variables or `.env` (see `.env.example`). The
 | `REFUND_MAX_USD` | `500` | above this the agent must escalate |
 | `MAX_AGENT_STEPS` | `10` | LLM calls per turn before stopping |
 | `EMBEDDING_PROVIDER` | `fastembed` | `hash` for tests |
+| `CORS_ORIGINS` | `http://localhost:3000` | comma-separated console origins |
+| `DEMO_RATE_LIMIT_PER_HOUR` | `0` (off) | per-IP cap on LLM calls for public demos |
+| `DEMO_RESET_ON_START` | unset | `true` resets demo data on container start |
 
 ## Project layout
 
