@@ -31,6 +31,16 @@ services:
       db:
         condition: service_healthy
 
+  web:
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
   # Optional fully-offline LLM:  docker compose --profile ollama up -d
   #                              docker compose exec ollama ollama pull qwen3:8b
   ollama:

@@ -11,3 +11,4 @@ dist/
 evals/reports/*.json
 evals/reports/*.md
 !evals/reports/.gitkeep
+.claude/

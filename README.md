@@ -14,6 +14,16 @@ and an **evaluation harness** tracks task success, latency, tokens and cost. It 
 It runs on **free LLM tiers only**: Google Gemini (primary), Groq (automatic fallback) or Ollama
 (fully local). A built-in offline model lets the whole stack, tests and CI run with no API key.
 
+## Operator console demo
+
+![Operator console: a customer asks for a refund, the agent pauses for approval, a support agent approves and the run resumes](docs/demo.gif)
+
+The **Next.js operator console** ([`web/`](web/)) streams agent replies over SSE with every tool call
+shown live, pauses write actions in an **Approvals** queue for a human, and tracks outcomes, p50/p95
+latency, tokens and cost on a **Metrics** page. In the demo above, the customer's refund request
+triggers `lookup_customer` and `search_knowledge_base`, then `issue_refund` pauses for approval; the
+support agent approves it and the LangGraph run resumes and issues the refund.
+
 ## Results
 
 Measured on the 31-scenario evaluation dataset (`ops-agent eval`) with **Gemini 3.5 Flash-Lite
@@ -85,8 +95,9 @@ Without keys, set `LLM_PROVIDER=fake` to use the deterministic offline model.
 ```powershell
 docker compose up -d --build
 ```
-The API starts on http://localhost:8000. Interactive docs are at http://localhost:8000/docs. The
-first start creates the schema, seeds demo data and indexes the knowledge base.
+The **operator console** starts on http://localhost:3000 and the API on http://localhost:8000
+(interactive docs at http://localhost:8000/docs). The first start creates the schema, seeds demo
+data and indexes the knowledge base.
 
 ### 3. Or run locally (Python venv)
 ```powershell
@@ -96,6 +107,10 @@ pip install -e ".[dev]"
 ops-agent init-db          # schema + demo data + KB index (idempotent)
 ops-agent chat --user alice   # interactive terminal demo (approve refunds inline)
 ops-agent serve            # API on http://127.0.0.1:8000
+```
+Console (separate terminal):
+```powershell
+cd web; npm install; npm run dev   # http://localhost:3000
 ```
 Postgres is exposed on host port **55432**, to avoid clashing with a local Postgres on 5432.
 
@@ -185,7 +200,7 @@ app/
               guardrails.py, prompts.py, context.py (RBAC)
   tools/      knowledge, customers, tickets, refunds, escalation, sql + sql_guard
   rag/        chunking, embeddings (fastembed / hash), ingest, hybrid search (pgvector + FTS + RRF)
-  api/        FastAPI app, routes, auth
+  api/        FastAPI app, routes, auth, CORS
   observability/tracker.py   latency / token / cost / tool tracing
   llm.py      provider factory + fallbacks;  llm_fake.py  offline models
   bootstrap.py  schema, read-only role, deterministic demo data
@@ -193,6 +208,7 @@ db/schema.sql
 data/kb/      help-center articles (knowledge base)
 evals/        datasets/support_v1.yaml, runner.py, reports/
 tests/        unit + integration tests
+web/          Next.js 16 operator console (chat with SSE streaming, approvals, tickets, metrics)
 ```
 
 ## Design notes
